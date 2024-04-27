@@ -6,7 +6,6 @@
 using namespace std;
 
 // class definitions
-
 class Node {
 public:
     int data;
@@ -31,7 +30,6 @@ public:
 
 
 // class declarations
-
 Node::Node() {
     this->data = -1;
 }
@@ -54,45 +52,9 @@ void HuffmanTree::populateArrays(ifstream& inOrderFile, ifstream& levelOrderFile
     }
 }
 
-const void HuffmanTree::printArrays() {
-    int size = this->inOrder.size();
-
-    cout << "In order:    [";
-    for (int i = 0; i < size; i ++) {
-        cout << this->inOrder.at(i);
-        if (i < size - 1) {
-            cout << ", ";
-        }
-    }
-    cout << "]" << endl;
-    cout << "Level order: [";
-    for (int i = 0; i < size; i ++) {
-        cout << this->levelOrder.at(i);
-        if (i < size - 1) {
-            cout << ", ";
-        }
-    }
-    cout << "]" << endl << endl;
-}
-
 Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &levelOrder, int parent, string side) {
     int size = levelOrder.size();
 
-    // test
-    // cout << "Parent node: " << parent<< ", side: " << side << endl;
-    // cout << "In order: ";
-    // for (int i = 0; i < size; i ++) {
-    //     cout << inOrder.at(i) << ", ";
-    // }
-    // cout << endl;
-
-    // cout << "Level order: ";
-    // for (int i = 0; i < size; i ++) {
-    //     cout << levelOrder.at(i) << ", ";
-    // }
-    // cout << endl << endl;
-
-    // if inputting an empty array
     if (size == 0) {
         return nullptr;
     }
@@ -139,35 +101,8 @@ Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &leve
             }
         }
     }
-            
-    // cout << "Left In-Order: ";
-    // for (int i = 0; i < leftSize; i ++) {
-    //     cout << leftInOrder.at(i) << ", ";
-    // }
-    // cout << endl;
-
-    // cout << "Left Level-Order: ";
-    // for (int i = 0; i < leftSize; i ++) {
-    //     cout << leftLevelOrder.at(i) << ", ";
-    // }
-    // cout << endl;
-
-    // cout << "Right In-Order: ";
-    // for (int i = 0; i < rightSize; i ++) {
-    //     cout << rightInOrder.at(i) << ", ";
-    // }
-    // cout << endl;
-
-    // cout << "Right Level-Order: ";
-    // for (int i = 0; i < rightSize; i ++) {
-    //     cout << rightLevelOrder.at(i) << ", ";
-    // }
-    // cout << endl;
     
     Node* newNode = new Node(levelOrder.at(0));
-
-    cout << "Created node " << levelOrder.at(0) << " as the " << side << " child to " << parent << endl;
-    
 
     if (leftInOrder.size() > 0) {
         newNode->left = this->buildTree(leftInOrder, leftLevelOrder, levelOrder.at(0), "left");
@@ -180,25 +115,8 @@ Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &leve
     return newNode;
 }
 
-const void printInOrder(Node* root) {
-    cout<< "lets print some shit" << endl;
-    if (root == NULL)
-        return;
-    printInOrder(root->left);
-    if(root && root->data){
-       cout << root->data << " " << endl; 
-    }
-    else{
-        cout << "bro u wrong" << endl;
-        return;
-    }
-    
-    printInOrder(root->right);
-}
-
 int main (int argc, char* argv[]) {
     // open input files
-
     if (argc != 4) {
         cout << "Error: incorrect number of command line arguments." << endl;
         return 1;
@@ -217,22 +135,18 @@ int main (int argc, char* argv[]) {
         return 1;
     }
 
-
     // create class and populate vectors
-
     HuffmanTree* tree = new HuffmanTree;
 
     tree->populateArrays(inOrderFile, levelOrderFile);
-    tree->printArrays();
     tree->root = tree->buildTree(tree->inOrder, tree->levelOrder, 0, "origin");
-    //printInOrder(tree->root);
 
     //get encoding
     string encodingLine;
     string encoding;
     encodedFile >> encodingLine;
     
-    while (!inOrderFile.eof()) {
+    while (!encodedFile.eof()) {
         encoding.append(encodingLine);
         encodedFile >> encodingLine; 
     }
@@ -240,22 +154,18 @@ int main (int argc, char* argv[]) {
     int encodingLen = encoding.length();
     Node* currNode = tree->root;
 
-    cout << " here" << endl;
     for (int i = 0; i < encodingLen; i ++) {
-        cout << "here" << endl;
+        if (int(encoding.at(i)) - '0') {
+            currNode = currNode->right;
+        } else {
+            currNode = currNode->left;
+        }
+
         if (currNode->data < 128) {
             cout << char(currNode->data);
             currNode = tree->root;
-        } else {
-            if (encoding.at(i)) {
-                currNode = currNode->right;
-            } else {
-                currNode = currNode->left;
-            }
         }
     }
-    cout << endl;
-
 
     return 0;
 }
