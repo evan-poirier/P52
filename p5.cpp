@@ -25,7 +25,7 @@ public:
     vector<int> levelOrder;
 
     void populateArrays(ifstream& inOrderFile, ifstream& levelOrderFile);
-    Node* buildTree(vector<int> const &inOrder, vector<int> const &levelOrder);
+    Node* buildTree(vector<int> const &inOrder, vector<int> const &levelOrder, int parent, string side);
     const void printArrays();
 };
 
@@ -64,7 +64,7 @@ const void HuffmanTree::printArrays() {
             cout << ", ";
         }
     }
-    cout << "]" << endl << endl;
+    cout << "]" << endl;
     cout << "Level order: [";
     for (int i = 0; i < size; i ++) {
         cout << this->levelOrder.at(i);
@@ -72,11 +72,25 @@ const void HuffmanTree::printArrays() {
             cout << ", ";
         }
     }
-    cout << "]" << endl;
+    cout << "]" << endl << endl;
 }
 
-Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &levelOrder) {
+Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &levelOrder, int parent, string side) {
     int size = levelOrder.size();
+
+    // test
+    // cout << "Parent node: " << parent<< ", side: " << side << endl;
+    // cout << "In order: ";
+    // for (int i = 0; i < size; i ++) {
+    //     cout << inOrder.at(i) << ", ";
+    // }
+    // cout << endl;
+
+    // cout << "Level order: ";
+    // for (int i = 0; i < size; i ++) {
+    //     cout << levelOrder.at(i) << ", ";
+    // }
+    // cout << endl << endl;
 
     // if inputting an empty array
     if (size == 0) {
@@ -152,22 +166,33 @@ Node* HuffmanTree::buildTree(vector<int> const &inOrder, vector<int> const &leve
     
     Node* newNode = new Node(levelOrder.at(0));
 
+    cout << "Created node " << levelOrder.at(0) << " as the " << side << " child to " << parent << endl;
+    
+
     if (leftInOrder.size() > 0) {
-        newNode->left = this->buildTree(leftInOrder, leftLevelOrder);
+        newNode->left = this->buildTree(leftInOrder, leftLevelOrder, levelOrder.at(0), "left");
     } 
 
     if (rightInOrder.size() > 0) {
-        newNode->right = this->buildTree(rightInOrder, rightLevelOrder);
+        newNode->right = this->buildTree(rightInOrder, rightLevelOrder, levelOrder.at(0), "right");
     }
 
     return newNode;
 }
 
 const void printInOrder(Node* root) {
-     if (root == NULL)
+    cout<< "lets print some shit" << endl;
+    if (root == NULL)
         return;
     printInOrder(root->left);
-    cout << root->data << " ";
+    if(root && root->data){
+       cout << root->data << " " << endl; 
+    }
+    else{
+        cout << "bro u wrong" << endl;
+        return;
+    }
+    
     printInOrder(root->right);
 }
 
@@ -199,8 +224,37 @@ int main (int argc, char* argv[]) {
 
     tree->populateArrays(inOrderFile, levelOrderFile);
     tree->printArrays();
-    tree->root = tree->buildTree(tree->inOrder, tree->levelOrder);
-    printInOrder(tree->root);
+    tree->root = tree->buildTree(tree->inOrder, tree->levelOrder, 0, "origin");
+    //printInOrder(tree->root);
+
+    //get encoding
+    string encodingLine;
+    string encoding;
+    encodedFile >> encodingLine;
+    
+    while (!inOrderFile.eof()) {
+        encoding.append(encodingLine);
+        encodedFile >> encodingLine; 
+    }
+
+    int encodingLen = encoding.length();
+    Node* currNode = tree->root;
+
+    cout << " here" << endl;
+    for (int i = 0; i < encodingLen; i ++) {
+        cout << "here" << endl;
+        if (currNode->data < 128) {
+            cout << char(currNode->data);
+            currNode = tree->root;
+        } else {
+            if (encoding.at(i)) {
+                currNode = currNode->right;
+            } else {
+                currNode = currNode->left;
+            }
+        }
+    }
+    cout << endl;
 
 
     return 0;
